@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FleetOptima — Fleet Management</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIINfQ3E7e9pZ5s9e7d7p4xwYp3b9G2s9Y="
+    crossorigin=""
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">F</div>
+        <div>
+          <h1>FleetOptima</h1>
+          <span>Fleet Management</span>
+        </div>
+      </div>
+
+      <nav class="main-nav">
+        <button class="nav-item active" data-page="dashboard">
+          <span class="nav-icon">▦</span> Dashboard
+        </button>
+        <button class="nav-item" data-page="route">
+          <span class="nav-icon">⌘</span> Route Optimizer
+        </button>
+        <button class="nav-item" data-page="fuel">
+          <span class="nav-icon">◯</span> Fuel Tracking
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="profile">
+          <div class="avatar">AU</div>
+          <div>
+            <strong>Admin User</strong>
+            <span>Administrator</span>
+          </div>
+        </div>
+        <button class="sign-out" id="signOutBtn">↪ <span>Sign Out</span></button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="mobile-brand">FleetOptima</div>
+        <div class="topbar-actions">
+          <button class="icon-button" aria-label="Notifications">♧<span class="notification-dot"></span></button>
+          <div class="topbar-divider"></div>
+          <div class="profile compact">
+            <div class="avatar">AU</div>
+            <strong>Admin User</strong>
+            <span>⌄</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="page page-dashboard active-page" id="dashboardPage">
+        <div class="page-heading">
+          <div>
+            <h2>Fleet Dashboard</h2>
+            <p>Real-time fleet performance and fuel analytics overview</p>
+          </div>
+        </div>
+
+        <section class="metric-grid">
+          <article class="metric-card blue">
+            <div class="metric-top">
+              <div class="metric-icon">⛽</div>
+              <span class="trend positive">↗ +3.2%</span>
+            </div>
+            <h3>₹13,51,395</h3>
+            <p>Total Fuel Cost (30d)</p>
+          </article>
+
+          <article class="metric-card green">
+            <div class="metric-top">
+              <div class="metric-icon">▥</div>
+              <span class="trend negative">↘ -1.5%</span>
+            </div>
+            <h3>₹19.86</h3>
+            <p>Cost per KM</p>
+          </article>
+
+          <article class="metric-card purple">
+            <div class="metric-top">
+              <div class="metric-icon">➤</div>
+              <span class="trend positive">↗ +5%</span>
+            </div>
+            <h3>50%</h3>
+            <p>Route Efficiency</p>
+          </article>
+
+          <article class="metric-card orange">
+            <div class="metric-top">
+              <div class="metric-icon">▣</div>
+            </div>
+            <h3>6/8</h3>
+            <p>Active Vehicles</p>
+          </article>
+        </section>
+
+        <section class="analytics-grid">
+          <article class="panel chart-panel">
+            <div class="panel-heading">
+              <div>
+                <h3>Fuel Consumption &amp; Distance Trend</h3>
+                <p>Last 30 days — fleet total</p>
+              </div>
+            </div>
+            <div class="legend">
+              <span><i class="legend-dot fuel"></i> Fuel (L)</span>
+              <span><i class="legend-dot distance"></i> Distance (km ÷ 10)</span>
+            </div>
+            <canvas id="trendChart"></canvas>
+          </article>
+
+          <article class="panel donut-panel">
+            <div class="panel-heading">
+              <div>
+                <h3>Fuel Type Split</h3>
+                <p>Fleet composition</p>
+              </div>
+            </div>
+            <div class="donut-wrap">
+              <canvas id="fuelChart"></canvas>
+            </div>
+            <div class="donut-legend">
+              <span><i class="legend-dot diesel"></i> Diesel <b>85%</b></span>
+              <span><i class="legend-dot petrol"></i> Petrol <b>15%</b></span>
+            </div>
+          </article>
+        </section>
+      </section>
+
+      <section class="page page-route" id="routePage">
+        <div class="page-heading">
+          <div>
+            <h2>Route Optimizer</h2>
+            <p>Add stops to build a route, then optimize for efficiency</p>
+          </div>
+        </div>
+
+        <div class="route-layout">
+          <article class="panel map-panel">
+            <div id="map"></div>
+            <div class="map-hint">📍 Click on the map to add delivery stops</div>
+            <div class="map-legend">
+              <span><i class="legend-dot start"></i> Start</span>
+              <span><i class="legend-dot stop"></i> Stop</span>
+              <span><i class="legend-dot end"></i> End</span>
+            </div>
+          </article>
+
+          <div class="route-side">
+            <article class="panel settings-panel">
+              <div class="panel-heading">
+                <h3>➤ Route Settings</h3>
+              </div>
+
+              <label for="vehicleSelect">VEHICLE</label>
+              <select id="vehicleSelect">
+                <option value="3.2">Truck Alpha — Volvo FH16 (3.2 km/L)</option>
+                <option value="4.4">Truck Beta — Tata Prima (4.4 km/L)</option>
+                <option value="5.2">Van Gamma — Ashok Leyland (5.2 km/L)</option>
+              </select>
+
+              <label for="citySelect">ADD CITY</label>
+              <select id="citySelect">
+                <option value="">Select a city...</option>
+                <option value="12.9716,77.5946,Bengaluru">Bengaluru</option>
+                <option value="13.0827,80.2707,Chennai">Chennai</option>
+                <option value="11.0168,76.9558,Coimbatore">Coimbatore</option>
+                <option value="9.9252,78.1198,Madurai">Madurai</option>
+                <option value="17.3850,78.4867,Hyderabad">Hyderabad</option>
+                <option value="15.3173,75.7139,Hubballi">Hubballi</option>
+                <option value="12.2958,76.6394,Mysuru">Mysuru</option>
+              </select>
+
+              <label class="checkbox-row">
+                <input type="checkbox" id="roundTrip" />
+                <span>Return to start (Round Trip)</span>
+              </label>
+
+              <div class="button-row">
+                <button class="primary-btn" id="optimizeBtn">✧ Optimize Route</button>
+                <button class="danger-btn" id="clearBtn" aria-label="Clear stops">▣</button>
+              </div>
+            </article>
+
+            <article class="panel stops-panel">
+              <div class="panel-heading">
+                <h3>⌖ Stops (<span id="stopCount">0</span>)</h3>
+              </div>
+              <div id="stopsList" class="stops-list">
+                <div class="empty-state">
+                  <div class="empty-pin">📍</div>
+                  <p>Add at least 3 stops to optimize</p>
+                </div>
+              </div>
+              <div class="route-summary hidden" id="routeSummary"></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="page page-fuel" id="fuelPage">
+        <div class="page-heading">
+          <div>
+            <h2>Fuel Tracking</h2>
+            <p>Monitor fuel usage, expenses, and vehicle efficiency</p>
+          </div>
+        </div>
+
+        <section class="metric-grid">
+          <article class="metric-card blue">
+            <div class="metric-top"><div class="metric-icon">⛽</div></div>
+            <h3>8,420 L</h3><p>Fuel Consumed (30d)</p>
+          </article>
+          <article class="metric-card green">
+            <div class="metric-top"><div class="metric-icon">₹</div></div>
+            <h3>₹19.86</h3><p>Average Cost / KM</p>
+          </article>
+          <article class="metric-card purple">
+            <div class="metric-top"><div class="metric-icon">▥</div></div>
+            <h3>4.8 km/L</h3><p>Average Mileage</p>
+          </article>
+          <article class="metric-card orange">
+            <div class="metric-top"><div class="metric-icon">▣</div></div>
+            <h3>8</h3><p>Tracked Vehicles</p>
+          </article>
+        </section>
+
+        <article class="panel fuel-table-panel">
+          <div class="panel-heading">
+            <div>
+              <h3>Recent Fuel Transactions</h3>
+              <p>Sample front-end data</p>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Vehicle</th><th>Fuel Type</th><th>Litres</th><th>Cost</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Truck Alpha</td><td>Diesel</td><td>220 L</td><td>₹20,240</td><td><span class="status success">Completed</span></td></tr>
+                <tr><td>Truck Beta</td><td>Diesel</td><td>180 L</td><td>₹16,560</td><td><span class="status success">Completed</span></td></tr>
+                <tr><td>Van Gamma</td><td>Petrol</td><td>75 L</td><td>₹7,125</td><td><span class="status pending">Pending</span></td></tr>
+                <tr><td>Truck Delta</td><td>Diesel</td><td>240 L</td><td>₹22,080</td><td><span class="status success">Completed</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
