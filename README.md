@@ -94,6 +94,10 @@ Project Type: Academic / Final Year Project
 
 Domain: Web Development
 
+
+<img width="1630" height="1566" alt="mermaid-diagram" src="https://github.com/user-attachments/assets/abb45945-53f3-49c8-93ef-c3ed4eeb1c69" />
+
+
 Project Title: Web-Based Fleet Management System with Route and Fuel Optimisation
 
 ⭐ If you find this project interesting, feel free to explore the repository!
